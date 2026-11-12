@@ -17,6 +17,7 @@ export async function POST(req) {
   const b = await body(req);
   let ids = (b.suite_ids || []).map(Number);
   if (b.layer) ids = all("SELECT id FROM suites WHERE layer=? AND enabled=1", b.layer).map((s) => s.id);
+  if (Array.isArray(b.repo_ids)) ids = all(`SELECT id FROM suites WHERE enabled=1 AND repo_id IN (${b.repo_ids.map(() => "?").join(",") || "NULL"}) ORDER BY CASE layer WHEN 'unit' THEN 0 WHEN 'integration' THEN 1 WHEN 'contract' THEN 2 WHEN 'pact' THEN 3 ELSE 4 END`, ...b.repo_ids.map(Number)).map((s) => s.id);
   if (b.all) ids = all("SELECT id FROM suites WHERE enabled=1 ORDER BY CASE layer WHEN 'unit' THEN 0 WHEN 'integration' THEN 1 WHEN 'contract' THEN 2 WHEN 'pact' THEN 3 ELSE 4 END").map((s) => s.id);
   ids = ids.filter((id) => get("SELECT 1 x FROM suites WHERE id=?", id));
   if (!ids.length) return fail(400, "No suites to run");

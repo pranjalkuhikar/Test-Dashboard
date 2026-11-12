@@ -24,9 +24,10 @@ export function Runs({ go, stats }) {
   );
 }
 
-export function RunDetail({ id, go, setErr }) {
+export function RunDetail({ id, go, setErr, onClose }) {
   const [d, setD] = useState(null);
   const [tab, setTab] = useState("tests");
+  const tabSet = useRef(false);
   const [log, setLog] = useState({ text: "", offset: 0 });
   const [open, setOpen] = useState({});
   const [tracing, setTracing] = useState(null);
@@ -43,6 +44,7 @@ export function RunDetail({ id, go, setErr }) {
   }, [id, live]);
   useEffect(() => { if (live && logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight; }, [log.text, live]);
 
+  useEffect(() => { if (d && !tabSet.current) { tabSet.current = true; if (["queued", "running"].includes(d.run.status)) setTab("log"); } }, [d]);
   if (!d) return <div className="empty">Loading…</div>;
   const { run, results, artifacts, newlyFailing, previous } = d;
   const openTrace = async (artifactId) => {
@@ -59,7 +61,7 @@ export function RunDetail({ id, go, setErr }) {
     <>
       <div className="head">
         <div>
-          <p style={{ margin: 0 }}><a href="#/runs" className="muted">← Runs</a></p>
+          {onClose && <button className="btn sm" onClick={onClose}>✕ Close</button>}
           <h1>{run.suite_name} <Status s={run.status} /></h1>
           <p>{layerName(run.layer)} · {run.repo_name}{run.commit_sha ? "@" + run.commit_sha : ""}{run.env_name ? " · env " + run.env_name : ""} · {run.trigger} · {ago(run.queued_at)}</p>
         </div>
@@ -85,7 +87,7 @@ export function RunDetail({ id, go, setErr }) {
             <div key={t.id} className={`test ${t.status}`}>
               <div className="th" onClick={() => t.error && setOpen((o) => ({ ...o, [t.id]: !o[t.id] }))}>
                 <Status s={t.status} />
-                <div className="nm">{t.name}{t.file && <div className="small muted">{t.file}</div>}</div>
+                <div className="nm">{t.name}{t.file && <div className="small muted">{t.file.split("/").slice(-2).join("/")}</div>}</div>
                 {newlyFailing.includes(t.id) && <span className="pill amber">new failure</span>}
                 {t.retries > 0 && <span className="pill amber">retried {t.retries}×</span>}
                 <span className="small muted">{ms(t.duration_ms)}</span>
