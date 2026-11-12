@@ -1,0 +1,13 @@
+{
+  "name": "central-tests",
+  "private": true,
+  "type": "module",
+  "description": "Cross-app test suites (integration, contract, pact, e2e). Unit tests live in each app's own repo.",
+  "scripts": {
+    "test:integration": "node --test \"integration/*.test.mjs\"",
+    "test:contract": "node --test \"contract/*.test.mjs\"",
+    "test:pact": "node --test \"pact/*.test.mjs\"",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": { "@playwright/test": "1.65.0" }
+}
