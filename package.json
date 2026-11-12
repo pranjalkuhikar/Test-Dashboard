@@ -1,0 +1,18 @@
+{
+  "name": "test-hub",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A testing dashboard: register app repos and a central tests repo, run every layer of the testing pyramid, keep history, open traces",
+  "scripts": {
+    "dev": "next dev -p 5200 -H localhost",
+    "build": "next build",
+    "start": "next start -p 5200 -H localhost"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.65.0",
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  }
+}
