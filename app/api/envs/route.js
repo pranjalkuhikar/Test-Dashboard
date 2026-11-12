@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { all, get, insert, now, json } from "@/lib/db";
 import { guard, fail, body } from "@/lib/guard";
-export const SECRET = /token|secret|password|key|auth|cookie/i;
-export const mask = (vars) => Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, SECRET.test(k) ? "•••" : v]));
+const SECRET = /token|secret|password|key|auth|cookie/i; // route files may only export handlers
+const mask = (vars) => Object.fromEntries(Object.entries(vars).map(([k, v]) => [k, SECRET.test(k) ? "•••" : v]));
 export async function GET(req) {
   const g = guard(req); if (g) return g;
   return NextResponse.json({ envs: all("SELECT * FROM envs ORDER BY name").map((e) => ({ ...e, vars: mask(json(e.vars)) })) });
