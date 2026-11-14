@@ -1,0 +1,13 @@
+{
+  "consumer": { "name": "frontend" },
+  "provider": { "name": "node-app" },
+  "interactions": [
+    { "description": "health check", "request": { "method": "GET", "path": "/api/health" },
+      "response": { "status": 200, "body": { "status": "ok", "db": "up" } } },
+    { "description": "list todos", "request": { "method": "GET", "path": "/api/todos" },
+      "response": { "status": 200, "body": { "data": [ { "id": 1, "title": "string", "done": false } ] }, "matchingRules": { "body": { "$.data": { "min": 0 } } } } },
+    { "description": "create todo without title", "request": { "method": "POST", "path": "/api/todos", "headers": { "content-type": "application/json" }, "body": {} },
+      "response": { "status": 400, "body": { "error": "string" } } }
+  ],
+  "metadata": { "pactSpecification": { "version": "3.0.0" } }
+}
