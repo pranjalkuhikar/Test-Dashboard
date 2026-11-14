@@ -1,5 +1,5 @@
 // Demo only: simulates an unreliable test. When DEMO_FLAKY=1 it fails on every other run (state kept in a temp file),
-// so after a few runs TestHub's "Flaky tests" page picks it up. Without the variable it always passes.
+// so after a few runs Test Dashboard's "Flaky tests" page picks it up. Without the variable it always passes.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
