@@ -117,8 +117,8 @@ export default function Workspace(p) {
   if (!repos.length) return (
     <div className="welcome">
       <h1>Run every layer of your tests from one place</h1>
-      <p className="muted">Unit tests stay in each app&apos;s repo. Integration, contract, Pact and E2E live in a separate tests repo. Add them here and TestHub runs them, keeps the history and opens traces for you.</p>
-      <div className="steps"><div><b>1 · Add a repo</b><span>A local folder or a Git URL.</span></div><div><b>2 · Find suites</b><span>TestHub reads package.json and Playwright configs.</span></div><div><b>3 · Pick and run</b><span>Tick the repos you want, press Run, read results right here.</span></div></div>
+      <p className="muted">Unit tests stay in each app&apos;s repo. Integration, contract, Pact and E2E live in a separate tests repo. Add them here and Test Dashboard runs them, keeps the history and opens traces for you.</p>
+      <div className="steps"><div><b>1 · Add a repo</b><span>A local folder or a Git URL.</span></div><div><b>2 · Find suites</b><span>Test Dashboard reads package.json and Playwright configs.</span></div><div><b>3 · Pick and run</b><span>Tick the repos you want, press Run, read results right here.</span></div></div>
       <button className="btn go" style={{ marginTop: 18 }} onClick={() => manage("repos")}>Add your first repo</button>
     </div>
   );

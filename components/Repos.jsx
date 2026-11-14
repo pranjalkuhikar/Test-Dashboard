@@ -14,10 +14,10 @@ export default function Repos({ setErr, refresh }) {
   const add = async () => { try { const r = await api("/repos", { method: "POST", body: form }); setForm(null); if (r.error) setErr("Added, but sync failed: " + r.error); load(); refresh(); } catch (e) { setErr(e.message); } };
   const sync = async (r) => { setMsg(`Syncing ${r.name}…`); const x = await api(`/repos/${r.id}/sync`, { method: "POST" }); setMsg(x.error ? "" : `${r.name} is at ${x.commit}`); if (x.error) setErr(x.error); load(); };
   const trust = async (r) => {
-    if (!r.trusted && !confirm(`Trust "${r.name}"?\n\nTest suites are shell commands. Trusting this repo lets TestHub run whatever its suites say, with your user's permissions. Only trust code you wrote or have read.`)) return;
+    if (!r.trusted && !confirm(`Trust "${r.name}"?\n\nTest suites are shell commands. Trusting this repo lets Test Dashboard run whatever its suites say, with your user's permissions. Only trust code you wrote or have read.`)) return;
     await api("/repos/" + r.id, { method: "PATCH", body: { trusted: !r.trusted } }); load();
   };
-  const del = async (r) => { if (confirm(`Remove "${r.name}" and all its suites and history from TestHub? Your files are not touched.`)) { await api("/repos/" + r.id, { method: "DELETE" }); load(); refresh(); } };
+  const del = async (r) => { if (confirm(`Remove "${r.name}" and all its suites and history from Test Dashboard? Your files are not touched.`)) { await api("/repos/" + r.id, { method: "DELETE" }); load(); refresh(); } };
   const find = async (r) => { try { const { found: items } = await api(`/repos/${r.id}/discover`); setFound({ repo: r, items, pick: Object.fromEntries(items.map((s, i) => [i, !s.exists])) }); } catch (e) { setErr(e.message); } };
   const doImport = async () => {
     const suites = found.items.filter((_, i) => found.pick[i]);
@@ -40,7 +40,7 @@ export default function Repos({ setErr, refresh }) {
             <div><label>Where is it</label><select value={form.source} onChange={set("source")}><option value="local">A folder on this computer</option><option value="git">A Git URL (clone it)</option></select></div>
             {form.source === "local" ? <div className="wide"><label>Folder path</label><input value={form.path} onChange={set("path")} placeholder="/Users/you/projects/central-tests" /></div>
               : <><div className="wide"><label>Git URL</label><input value={form.url} onChange={set("url")} placeholder="https://github.com/you/central-tests.git" /></div><div><label>Branch (optional)</label><input value={form.branch} onChange={set("branch")} placeholder="main" /></div></>}
-            <div className="wide warnbox"><label style={{ display: "flex", gap: 8, alignItems: "flex-start", color: "inherit", fontSize: 12.5 }}><input type="checkbox" checked={form.trusted} onChange={set("trusted")} style={{ marginTop: 3 }} /><span><b>I trust this code.</b> Suites are shell commands, and TestHub runs them as you. A repo that isn&apos;t trusted can be added and browsed, but nothing in it will run.</span></label></div>
+            <div className="wide warnbox"><label style={{ display: "flex", gap: 8, alignItems: "flex-start", color: "inherit", fontSize: 12.5 }}><input type="checkbox" checked={form.trusted} onChange={set("trusted")} style={{ marginTop: 3 }} /><span><b>I trust this code.</b> Suites are shell commands, and Test Dashboard runs them as you. A repo that isn&apos;t trusted can be added and browsed, but nothing in it will run.</span></label></div>
           </div>
           <div className="acts" style={{ marginTop: 14 }}><button className="btn go" onClick={add} disabled={!form.name || !(form.source === "git" ? form.url : form.path)}>Add</button><button className="btn" onClick={() => setForm(null)}>Cancel</button></div>
         </div>

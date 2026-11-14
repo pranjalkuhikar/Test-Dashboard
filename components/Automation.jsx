@@ -16,7 +16,7 @@ export default function Automation({ setErr, envs }) {
       <div className="head"><div><h1>Automation</h1><p>Run suites without clicking: on a timer, or when a CI job or git hook calls a webhook.</p></div></div>
       <div className="card">
         <h2>Schedules</h2>
-        {!scheduled.length ? <p className="muted small">None. Set &quot;Run on a schedule&quot; when editing a suite. TestHub must be running for schedules to fire; a suite is skipped if its previous run is still going.</p> :
+        {!scheduled.length ? <p className="muted small">None. Set &quot;Run on a schedule&quot; when editing a suite. Test Dashboard must be running for schedules to fire; a suite is skipped if its previous run is still going.</p> :
           <table className="tbl" style={{ marginTop: 8 }}><thead><tr><th>Suite</th><th>Every</th><th>Last triggered</th></tr></thead><tbody>{scheduled.map((s) => <tr key={s.id}><td>{s.name}<div className="small muted">{s.repo_name}</div></td><td>{s.schedule_min} min</td><td className="muted">{ago(s.last_scheduled)}</td></tr>)}</tbody></table>}
       </div>
       <div className="card">
@@ -36,7 +36,7 @@ export default function Automation({ setErr, envs }) {
             <button className="btn sm" onClick={() => { navigator.clipboard?.writeText(snippet(h.token)); setCopied(h.token); setTimeout(() => setCopied(""), 1500); }}>{copied === h.token ? "Copied" : "Copy"}</button>
             <button className="btn sm danger" onClick={async () => { await api("/hooks?token=" + h.token, { method: "DELETE" }); load(); }}>Delete</button>
           </div></div>))}</div>
-        <p className="hint" style={{ marginTop: 10 }}>Anyone who can reach this URL can start those suites, so keep it private. TestHub listens only on this computer unless you expose it.</p>
+        <p className="hint" style={{ marginTop: 10 }}>Anyone who can reach this URL can start those suites, so keep it private. Test Dashboard listens only on this computer unless you expose it.</p>
       </div>
     </>
   );

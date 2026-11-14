@@ -55,7 +55,7 @@ export default function Hub() {
   return (
     <div className="app">
       <header className="top">
-        <div className="brand"><div className="logo">✓</div><div><b>TestHub</b><small>run and review every layer of your tests</small></div></div>
+        <div className="brand"><div className="logo">✓</div><div><b>Test Dashboard</b><small>run and review every layer of your tests</small></div></div>
         <div className="topmid">
           <span className="muted small">Run against</span>
           <select value={envId} onChange={(e) => pickEnv(e.target.value)} className="envsel">

@@ -1,4 +1,4 @@
-# TestHub
+# Test Dashboard
 
 One dashboard to run **every layer of your tests** (unit, integration, contract, Pact, end-to-end and more), watch results live, spot flaky tests, and open a **Playwright trace** with one click.
 
@@ -12,11 +12,11 @@ It is a Next.js full-stack app in plain JavaScript. Everything is stored in one 
  auth-hub/      → unit
  load-tester/   → unit
               \                                   /
-               └────────►  TestHub  ◄─────────────┘
+               └────────►  Test Dashboard  ◄─────────────┘
                  register repo → find suites → run → results, logs, traces, history
 ```
 
-* A **repo** is a folder (or a Git URL TestHub clones for you). It is either an *app repo* or a *tests repo*.
+* A **repo** is a folder (or a Git URL Test Dashboard clones for you). It is either an *app repo* or a *tests repo*.
 * A **suite** is one command in one repo that exercises one **layer**. Example: `node --test "contract/*.test.mjs"`.
 * A **run** is one execution of a suite: log, per-test results, duration, commit, files (screenshots, traces).
 * An **environment** is a named set of variables (like `NEXT_URL=http://localhost:3000`) passed to the suite.
@@ -24,17 +24,17 @@ It is a Next.js full-stack app in plain JavaScript. Everything is stored in one 
 ## Start it
 
 ```bash
-cd test-hub
+cd test-dashboard
 npm install
 npm run dev          # http://localhost:5200
 ```
 
-Needs Node 22+ (it uses the built-in `node:sqlite`; Node prints an "experimental" notice, that is expected). Data lives in `test-hub/data/` (git-ignored).
+Needs Node 22+ (it uses the built-in `node:sqlite`; Node prints an "experimental" notice, that is expected). Data lives in `test-dashboard/data/` (git-ignored).
 
 ## First use, in four steps
 
 1. **Repos → Add repo.** Give a folder path or Git URL. Tick *I trust this code* (see Safety).
-2. **Find suites.** TestHub reads `package.json` test scripts, Playwright configs and TestLab's `tests-generated/` folder, and proposes suites with a layer and the right reporter flags. Tick the ones you want.
+2. **Find suites.** Test Dashboard reads `package.json` test scripts, Playwright configs and TestLab's `tests-generated/` folder, and proposes suites with a layer and the right reporter flags. Tick the ones you want.
 3. **Environments → New.** Add variables your tests need, e.g. `NEXT_URL`, `NODE_API_URL`. Pick it in the sidebar's *Run against* box.
 4. **Suites → Run** (or **Run everything**). Open the run to follow the log and see each test.
 
@@ -52,13 +52,13 @@ Needs Node 22+ (it uses the built-in `node:sqlite`; Node prints an "experimental
 
 ### Traces
 
-For Playwright suites TestHub adds `--output` and (if you choose a trace mode on the suite) `--trace`, collects `trace.zip` files and links each one to its test. **Open trace** starts `playwright show-trace <zip> --port N` on localhost and opens it in a new tab. Viewers close themselves after 30 idle minutes.
+For Playwright suites Test Dashboard adds `--output` and (if you choose a trace mode on the suite) `--trace`, collects `trace.zip` files and links each one to its test. **Open trace** starts `playwright show-trace <zip> --port N` on localhost and opens it in a new tab. Viewers close themselves after 30 idle minutes.
 
 If you have no Playwright browser downloaded, set `PLAYWRIGHT_EXECUTABLE` in an environment to a Chrome, Brave or Edge binary and point your config's `launchOptions.executablePath` at it (the demo repo does this).
 
 ### Result formats
 
-| Parser | Used for | Flags TestHub expects in the command |
+| Parser | Used for | Flags Test Dashboard expects in the command |
 | --- | --- | --- |
 | `junit` | `node --test`, most runners | `--test-reporter=junit --test-reporter-destination={{results}}` |
 | `playwright` | Playwright | `--reporter=list,json` (the JSON path is set for you) |
@@ -69,7 +69,7 @@ If you have no Playwright browser downloaded, set `PLAYWRIGHT_EXECUTABLE` in an 
 
 ### Automation
 
-* **Schedule:** edit a suite, set *Run on a schedule*. A suite is skipped if its previous run is still going. TestHub has to be running.
+* **Schedule:** edit a suite, set *Run on a schedule*. A suite is skipped if its previous run is still going. Test Dashboard has to be running.
 * **Webhook:** Automation → New webhook → `curl -X POST http://localhost:5200/api/hook/<token>`. The token is the credential; it only runs the suites chosen when you created it.
 
 ## Safety
