@@ -85,7 +85,7 @@ Running a test suite means running shell commands as you, so:
 
 ## Demo repo
 
-`../central-tests` is a working tests repo:
+`central-tests/` (a folder in this repo) is a working tests repo. Run `npm install` inside it once, then register it on the Repos page. The apps it tests must run with `AUTH_REQUIRED=false` (the tests call the APIs without logging in):
 
 | Layer | What it does |
 | --- | --- |
