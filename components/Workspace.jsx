@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api, ms, ago, Status, layerName, LAYER_INFO } from "./ui";
 import { repoHealth } from "./Hub";
+import AnalysisCard from "./AnalysisCard";
 
 const ORDER = Object.keys(LAYER_INFO);
 const active = (s) => s.last && ["queued", "running"].includes(s.last.status);
@@ -60,7 +61,7 @@ function Suite({ s, repo, runSuite, openRun, openTrace, tracing }) {
   );
 }
 
-function RepoPanel({ repo, runRepos, runSuite, openRun, busy, manage, openTrace, tracing, flakyN }) {
+function RepoPanel({ repo, runRepos, runSuite, openRun, busy, manage, openTrace, tracing, flakyN, focus, refresh, setErr }) {
   const h = repoHealth(repo);
   const done = repo.suites.filter((s) => s.done);
   const tests = done.reduce((a, s) => a + s.done.total, 0), passed = done.reduce((a, s) => a + s.done.passed, 0), failed = done.reduce((a, s) => a + s.done.failed, 0);
@@ -68,7 +69,7 @@ function RepoPanel({ repo, runRepos, runSuite, openRun, busy, manage, openTrace,
   const layers = [...new Set(repo.suites.map((s) => s.layer))].sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b));
   const pct = tests ? Math.round((passed / tests) * 100) : null;
   return (
-    <section className="rpanel">
+    <section className="rpanel" id={`repo-${repo.id}`}>
       <div className="rhead">
         <div>
           <h2>{repo.name} <span className={`pill ${repo.kind === "tests" ? "teal" : "blue"}`}>{repo.kind === "tests" ? "tests repo" : "app repo"}</span>
@@ -77,8 +78,9 @@ function RepoPanel({ repo, runRepos, runSuite, openRun, busy, manage, openTrace,
             {!repo.trusted && <span className="pill amber">not trusted</span>}</h2>
           <div className="small muted" style={{ marginTop: 3 }}>{repo.path}{repo.last_commit ? ` · ${repo.last_commit}` : ""}</div>
         </div>
-        <button className="btn go" disabled={busy || !repo.trusted || !repo.suites.length || h === "running"} onClick={() => runRepos([repo.id])}>▶ Run this repo</button>
+        <div className="acts"><a className="btn" href={`/api/repos/${repo.id}/report`} target="_blank" rel="noreferrer">📄 Report</a><button className="btn go" disabled={busy || !repo.trusted || !repo.suites.length || h === "running"} onClick={() => runRepos([repo.id])}>▶ Run this repo</button></div>
       </div>
+      <AnalysisCard repo={repo} refresh={refresh} openRun={openRun} setErr={setErr} autoOpen={focus === repo.id ? true : undefined} runCount={repo.suites.filter((s) => s.done).length} />
       {!repo.trusted && <div className="warnbox" style={{ margin: "12px 0 0" }}>This repo isn&apos;t trusted, so nothing in it will run. <a onClick={() => manage("repos")}>Open Repos to trust it</a>.</div>}
       {!repo.suites.length ? (
         <div className="empty">No suites yet. <button className="btn sm go" onClick={() => manage("repos")}>Find suites</button></div>

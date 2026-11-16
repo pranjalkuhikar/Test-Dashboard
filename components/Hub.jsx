@@ -4,6 +4,7 @@ import { api, ago, layerName } from "./ui";
 import Workspace from "./Workspace";
 import Manage from "./Manage";
 import { RunDetail } from "./Runs";
+import Hero from "./Hero";
 
 export const repoHealth = (r) => {
   const s = r.suites;
@@ -24,6 +25,7 @@ export default function Hub() {
   const [drawer, setDrawer] = useState(null); // run id
   const [toast, setToast] = useState("");
   const [busy, setBusy] = useState(false);
+  const [focus, setFocus] = useState(null); // repo just analysed: scroll to it and open its analysis
 
   const setErr = useCallback((m) => { setToast(m); }, []);
   const refresh = useCallback(async () => {
@@ -50,7 +52,8 @@ export default function Hub() {
   const runSuite = async (id) => { try { const x = await api(`/suites/${id}/run`, { method: "POST", body: { env_id: envId || null } }); refresh(); return x.run_id; } catch (e) { setToast(e.message); } };
   const runnable = selected.filter((r) => r.trusted && r.suites.some((s) => s.enabled));
   const nTests = selected.reduce((a, r) => a + r.suites.reduce((b, s) => b + (s.done?.total || 0), 0), 0);
-  const ctx = { ws, repos, selected, stats, envs, envId, setErr, refresh, runSuite, runRepos, busy, openRun: setDrawer, manage: setManage, toggle, only };
+  const analysed = async (r) => { await refresh(); only(r.repo_id); setFocus(r.repo_id); setTimeout(() => document.getElementById("repo-" + r.repo_id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250); };
+  const ctx = { focus, ws, repos, selected, stats, envs, envId, setErr, refresh, runSuite, runRepos, busy, openRun: setDrawer, manage: setManage, toggle, only };
 
   return (
     <div className="app">
@@ -93,7 +96,7 @@ export default function Hub() {
             );
           })}
         </aside>
-        <main className="main"><Workspace {...ctx} nTests={nTests} /></main>
+        <main className="main"><Hero onDone={analysed} setErr={setErr} /><Workspace {...ctx} nTests={nTests} /></main>
       </div>
       {drawer && <div className="scrim" onClick={() => setDrawer(null)}><aside className="drawer" onClick={(e) => e.stopPropagation()}><RunDetail id={drawer} go={(p) => setDrawer(p.split("/")[1])} setErr={setErr} onClose={() => setDrawer(null)} /></aside></div>}
       {manage && <Manage tab={manage} setTab={setManage} onClose={() => { setManage(null); refresh(); }} {...ctx} />}
