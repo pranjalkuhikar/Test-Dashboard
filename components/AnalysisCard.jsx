@@ -77,6 +77,17 @@ export default function AnalysisCard({ repo, refresh, openRun, setErr, autoOpen,
             ))}
             {a.findings.some((f) => f.level === "bad" || f.level === "warn") && <p className="hint">Need these tests written? <a href="http://localhost:5100" target="_blank" rel="noreferrer">Test Lab</a> scans a project and generates unit, integration, contract and E2E tests.</p>}
           </div>
+          {a.inventory.length > 0 && (
+            <details className="tfiles">
+              <summary>Browse the {s.tests} tests found ({a.inventory.length} file{a.inventory.length === 1 ? "" : "s"})</summary>
+              {a.inventory.slice(0, 40).map((f) => (
+                <div className="tf" key={f.file}>
+                  <div className="tfh"><span className="pill" style={{ color: LC[f.layer], borderColor: LC[f.layer] }}>{layerName(f.layer)}</span><b>{f.file}</b><span className="muted small">{f.tests} test{f.tests === 1 ? "" : "s"}</span></div>
+                  <ul>{f.names.slice(0, 12).map((n, i) => <li key={i}>{n}</li>)}{f.names.length > 12 && <li className="muted">… and {f.tests - 12} more (see the report)</li>}</ul>
+                </div>
+              ))}
+            </details>
+          )}
           <div className="runbox">
             <h4>Run its tests</h4>
             {!d.suites.length ? <div className="muted small">No runnable test command was found (looked for package.json test scripts, Playwright configs and pytest). {s.tests ? "Add a test script so the dashboard can run them." : ""}</div> : (

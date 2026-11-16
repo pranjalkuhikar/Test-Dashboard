@@ -38,7 +38,7 @@ export async function POST(req) {
     repo = get("SELECT * FROM repos WHERE id=?", id);
   }
   const sync = await syncRepo(repo); // clone/pull only: git does not run the repo's code
-  if (sync.error) { if (!repo.last_sync_at) run("DELETE FROM repos WHERE id=?", repo.id); return fail(400, sync.error.includes("clone failed") ? `Could not fetch that repo (${sync.error.replace("git clone failed: ", "")}). Is it public?` : sync.error); }
+  if (sync.error) { if (!repo.last_sync_at) run("DELETE FROM repos WHERE id=?", repo.id); return fail(400, sync.error.includes("clone failed") ? `Could not fetch that repo (${sync.error.replace("git clone failed: ", "")}). If it is private, make sure \`git clone\` works for it in your own terminal (this computer's Git login is what gets used); otherwise check the link.` : sync.error); }
   run("UPDATE repos SET last_sync_at=?, last_commit=?, last_error=NULL WHERE id=?", now(), sync.commit || null, repo.id);
   const analysis = analyzeRepo(repo.path);
   const suites = discoverSuites(repo.path);
