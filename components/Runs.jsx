@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { api, ms, ago, bytes, Status, layerName } from "./ui";
+import { isBrowserError, installAndRerun } from "./Workspace";
 
 export function Runs({ go, stats }) {
   const [runs, setRuns] = useState([]);
@@ -75,7 +76,7 @@ export function RunDetail({ id, go, setErr, onClose }) {
         <div className="kpi"><div className="k">Skipped</div><div className="v">{run.skipped}</div></div>
         <div className="kpi"><div className="k">Duration</div><div className="v">{ms(run.duration_ms)}</div><div className="s">{live ? "running…" : `exit ${run.exit_code ?? "-"}`}</div></div>
       </div>
-      {run.error && <div className="warnbox">{run.error}</div>}
+      {run.error && <div className="warnbox">{run.error}{isBrowserError(run.error) && <div style={{ marginTop: 8 }}><button className="btn sm go" onClick={async () => go("run/" + (await installAndRerun(run.suite_id, run.env_id)))}>Install browser &amp; run again</button></div>}</div>}
       <div className="tabs">
         {[["tests", `Tests (${results.length})`], ["log", "Log"], ["artifacts", `Artifacts (${artifacts.length})`]].map(([k, l]) => <button key={k} className={tab === k ? "on" : ""} onClick={() => setTab(k)}>{l}</button>)}
       </div>

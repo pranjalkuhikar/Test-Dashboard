@@ -4,10 +4,18 @@ import { api, ms, ago, Status, layerName, LAYER_INFO } from "./ui";
 import { repoHealth } from "./Hub";
 import AnalysisCard from "./AnalysisCard";
 
+
+const PW_INSTALL = "npx playwright install chromium";
+export const isBrowserError = (e) => /Playwright's browser isn't installed/.test(e || "");
+export async function installAndRerun(suiteId, envId) {
+  const { api } = await import("./ui");
+  await api(`/suites/${suiteId}`, { method: "PATCH", body: { setup: PW_INSTALL, timeout_s: 900 } });
+  return (await api(`/suites/${suiteId}/run`, { method: "POST", body: { env_id: envId || null } })).run_id;
+}
 const ORDER = Object.keys(LAYER_INFO);
 const active = (s) => s.last && ["queued", "running"].includes(s.last.status);
 
-function Tests({ runId, openTrace, tracing }) {
+function Tests({ runId, openTrace, tracing, openRun }) {
   const [d, setD] = useState(null);
   const [all, setAll] = useState(false);
   useEffect(() => { let on = true; api("/runs/" + runId).then((x) => on && setD(x)).catch(() => {}); return () => { on = false; }; }, [runId]);
@@ -17,7 +25,7 @@ function Tests({ runId, openTrace, tracing }) {
   const show = all ? d.results : [...bad, ...rest.slice(0, Math.max(0, 8 - bad.length))];
   return (
     <div className="tests">
-      {d.run.error && <div className="warnbox" style={{ marginBottom: 8 }}>{d.run.error}</div>}
+      {d.run.error && <div className="warnbox" style={{ marginBottom: 8 }}>{d.run.error}{isBrowserError(d.run.error) && <div style={{ marginTop: 8 }}><button className="btn sm go" onClick={async () => openRun(await installAndRerun(d.run.suite_id, d.run.env_id))}>Install browser &amp; run again</button></div>}</div>}
       {show.map((t) => (
         <div key={t.id} className={`trow ${t.status}`}>
           <div className="thead">
@@ -56,7 +64,7 @@ function Suite({ s, repo, runSuite, openRun, openTrace, tracing }) {
               {r && <button className="btn sm" onClick={() => openRun(r.id)}>Details</button>}</>}
         </div>
       </div>
-      {isOpen && r && <Tests runId={r.id} openTrace={openTrace} tracing={tracing} />}
+      {isOpen && r && <Tests runId={r.id} openTrace={openTrace} tracing={tracing} openRun={openRun} />}
     </div>
   );
 }

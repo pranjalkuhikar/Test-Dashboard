@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "node:fs";
-import { get, run } from "@/lib/db";
+import { get, all, run } from "@/lib/db";
+import { runDir } from "@/lib/runner";
 import { guard, fail, body } from "@/lib/guard";
 import { REPOS_DIR } from "@/lib/git";
 
@@ -16,7 +17,11 @@ export async function DELETE(req, { params }) {
   const g = guard(req); if (g) return g;
   const { id } = await params, r = get("SELECT * FROM repos WHERE id=?", id);
   if (!r) return fail(404, "Not found");
+  // everything this repo left behind: run logs, results, screenshots and traces on disk, then its rows (suites, runs, results)
+  const runIds = all("SELECT r.id FROM runs r JOIN suites s ON s.id = r.suite_id WHERE s.repo_id = ?", id).map((x) => x.id);
   run("DELETE FROM repos WHERE id=?", id);
-  if (r.source === "git" && r.path.startsWith(REPOS_DIR)) fs.rmSync(r.path, { recursive: true, force: true }); // only our own clones, never a user's folder
-  return NextResponse.json({ ok: true });
+  for (const rid of runIds) fs.rmSync(runDir(rid), { recursive: true, force: true });
+  const cloned = r.source === "git" && r.path.startsWith(REPOS_DIR + "/");
+  if (cloned) fs.rmSync(r.path, { recursive: true, force: true }); // only our own clones, never a user's folder
+  return NextResponse.json({ ok: true, runs_removed: runIds.length, clone_deleted: cloned });
 }

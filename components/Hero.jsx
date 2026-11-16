@@ -2,8 +2,6 @@
 import { useState } from "react";
 import { api } from "./ui";
 
-const EXAMPLES = ["jshttp/cookie", "tj/commander.js", "sindresorhus/p-limit"];
-
 // The front door: paste any public GitHub repo (or a folder on this computer) and get a test analysis.
 export default function Hero({ onDone, setErr }) {
   const [input, setInput] = useState("");
@@ -28,7 +26,6 @@ export default function Hero({ onDone, setErr }) {
           <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="https://github.com/owner/repo   or   /Users/you/project" disabled={!!busy} spellCheck={false} />
           <button className="btn go big" disabled={!input.trim() || !!busy}>{busy ? <><span className="spin" />{busy}</> : "Analyze"}</button>
         </form>
-        <div className="eg"><span>Try:</span>{EXAMPLES.map((x) => <button key={x} className="chipbtn" disabled={!!busy} onClick={() => go(x)}>{x}</button>)}</div>
       </div>
     </section>
   );

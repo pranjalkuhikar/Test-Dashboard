@@ -78,3 +78,5 @@ body { background: radial-gradient(1200px 600px at 12% -12%, #243a8a55 0, transp
 .suite { transition: border-color .15s, transform .15s; } .suite:hover { border-color: #3b4a8a; }
 .rrow { transition: border-color .15s, background .15s; }
 .tfiles { grid-column: 1 / -1; border-top: 1px solid #25316188; padding-top: 14px; } .tfiles summary { cursor: pointer; font-weight: 600; color: #cdd7ff; } .tf { margin-top: 12px; } .tfh { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; } .tfh b { font-size: 13px; word-break: break-all; } .tf ul { margin: 6px 0 0; padding-left: 22px; color: #b6c2e4; font-size: 13px; } .tf li { margin: 2px 0; }
+.rm { position: absolute; right: 8px; bottom: 8px; background: none; border: 0; color: var(--muted); font-size: 13px; cursor: pointer; opacity: .35; border-radius: 6px; width: 24px; height: 24px; display: grid; place-items: center; } .rrow:hover .rm { opacity: 1; } .rm:hover { color: var(--red); background: #f871711f; }
+.rname { padding-right: 34px; word-break: break-word; }

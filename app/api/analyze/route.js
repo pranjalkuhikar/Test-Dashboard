@@ -34,7 +34,7 @@ export async function POST(req) {
   if (repo && ((inp.source === "git" && repo.url !== inp.url) || (inp.source === "local" && repo.path !== inp.path))) return fail(409, `A different repo is already registered as "${name}". Remove it first.`);
   if (!repo) {
     const p = inp.source === "git" ? path.join(REPOS_DIR, name) : inp.path;
-    const id = insert("INSERT INTO repos (name, kind, source, path, url, branch, trusted, created_at) VALUES (?,?,?,?,?,?,0,?)", name, "app", inp.source, p, inp.url || null, inp.branch, now());
+    const id = insert("INSERT INTO repos (name, kind, source, path, url, branch, trusted, created_at) VALUES (?,?,?,?,?,?,0,?)", name, "app", inp.source, p, inp.url || null, inp.branch ?? null, now());
     repo = get("SELECT * FROM repos WHERE id=?", id);
   }
   const sync = await syncRepo(repo); // clone/pull only: git does not run the repo's code

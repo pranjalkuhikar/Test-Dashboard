@@ -16,6 +16,7 @@ export const LAYER_INFO = {
   contract: ["Contract", "The shape of what one service promises another."],
   pact: ["Pact", "Consumer-driven contracts checked against the real provider."],
   e2e: ["E2E", "A real browser clicking through the real app."],
+  component: ["Component", "One screen or widget rendered on its own."],
   smoke: ["Smoke", "A few checks that the app is alive after a deploy."], a11y: ["Accessibility", "Automated accessibility checks."], perf: ["Performance", "Speed and load checks."], visual: ["Visual", "Screenshot comparisons."], security: ["Security", "Security scans."],
 };
 export const layerName = (l) => LAYER_INFO[l]?.[0] || l;

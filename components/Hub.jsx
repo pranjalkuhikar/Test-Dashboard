@@ -41,6 +41,19 @@ export default function Hub() {
   const toggle = (id) => { const n = new Set((sel || new Set(repos.map((r) => r.id)))); n.has(id) ? n.delete(id) : n.add(id); setSel(n); try { localStorage.setItem("th.sel", JSON.stringify([...n])); } catch {} };
   const only = (id) => { const n = new Set([id]); setSel(n); try { localStorage.setItem("th.sel", JSON.stringify([...n])); } catch {} };
   const all = (on) => { const n = on ? new Set(repos.map((r) => r.id)) : new Set(); setSel(n); try { localStorage.setItem("th.sel", JSON.stringify([...n])); } catch {} };
+  const removeRepo = async (r) => {
+    const msg = r.source === "git"
+      ? `Remove "${r.name}" from the dashboard?\n\nThis deletes its run history, results and reports, and the downloaded copy of the repo on this computer. The repo on GitHub is not touched.`
+      : `Remove "${r.name}" from the dashboard?\n\nThis deletes its run history, results and reports. The folder on your computer (${r.path}) is not touched.`;
+    if (!confirm(msg)) return;
+    try {
+      const x = await api("/repos/" + r.id, { method: "DELETE" });
+      const n = new Set(sel || repos.map((q) => q.id)); n.delete(r.id); setSel(n);
+      try { localStorage.setItem("th.sel", JSON.stringify([...n])); } catch {}
+      setToast(`Removed ${r.name} (${x.runs_removed} run${x.runs_removed === 1 ? "" : "s"} deleted)`);
+      await refresh();
+    } catch (e) { setToast(e.message); }
+  };
   const pickEnv = (v) => { setEnv(v); try { localStorage.setItem("th.env", v); } catch {} };
   const envId = env && envs.some((e) => String(e.id) === env) ? env : "";
 
@@ -92,6 +105,7 @@ export default function Hub() {
                   <div className="chips">{[...new Set(r.suites.map((s) => s.layer))].map((l) => <span key={l} className="pill">{layerName(l)}</span>)}</div>
                 </div>
                 <button className="only" title="Show only this repo" onClick={(e) => { e.preventDefault(); only(r.id); }}>only</button>
+                <button className="rm" title="Remove this repo and its history from the dashboard" onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeRepo(r); }}>✕</button>
               </label>
             );
           })}

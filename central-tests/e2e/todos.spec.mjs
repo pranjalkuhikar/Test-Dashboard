@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("home page loads and shows the todo app", async ({ page }) => {
   await page.goto("/");
-  await expect(page.getByRole("heading", { level: 1 })).toContainText("Next.js app");
+  await expect(page.getByRole("heading", { level: 1 })).toContainText("Your todos");
 });
 
 test("a todo added in the UI appears in the list and via the API", async ({ page, request }) => {
