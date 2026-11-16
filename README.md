@@ -2,7 +2,7 @@
 
 One dashboard to run **every layer of your tests** (unit, integration, contract, Pact, end-to-end and more), watch results live, spot flaky tests, and open a **Playwright trace** with one click.
 
-It is a Next.js full-stack app in plain JavaScript. Everything is stored in one local SQLite file. Nothing leaves your machine.
+It is a Next.js full-stack app in plain JavaScript. Runs, results and settings are stored in a local **PostgreSQL** database. Nothing leaves your machine.
 
 ## How it fits together
 
@@ -29,7 +29,8 @@ npm install
 npm run dev          # http://localhost:5200
 ```
 
-Needs Node 22+ (it uses the built-in `node:sqlite`; Node prints an "experimental" notice, that is expected). Data lives in `test-dashboard/data/` (git-ignored).
+Needs Node 22+ and a running **PostgreSQL** (macOS: `brew install postgresql@17 && brew services start postgresql@17`).
+The connection comes from `DATABASE_URL` (default `postgres://app:app@localhost:5432/testdashboard`). The database `testdashboard` and its tables are created automatically on first use, so the user in the URL needs permission to create databases. Run logs, artifacts and cloned repos still live on disk in `test-dashboard/data/` (git-ignored).
 
 ## First use, in four steps
 

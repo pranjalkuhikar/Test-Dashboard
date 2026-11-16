@@ -5,6 +5,10 @@ import Workspace from "./Workspace";
 import Manage from "./Manage";
 import { RunDetail } from "./Runs";
 import Hero from "./Hero";
+import Icon from "./icons";
+import Logo from "./Logo";
+import ResultsCard from "./ResultsCard";
+import RepoCards from "./RepoCards";
 
 export const repoHealth = (r) => {
   const s = r.suites;
@@ -20,11 +24,11 @@ export default function Hub() {
   const [stats, setStats] = useState(null);
   const [envs, setEnvs] = useState([]);
   const [sel, setSel] = useState(null); // Set of repo ids the user chose
-  const [env, setEnv] = useState("");
   const [manage, setManage] = useState(null); // tab name or null
   const [drawer, setDrawer] = useState(null); // run id
   const [toast, setToast] = useState("");
   const [busy, setBusy] = useState(false);
+  const [theme, setTheme] = useState("light");
   const [focus, setFocus] = useState(null); // repo just analysed: scroll to it and open its analysis
 
   const setErr = useCallback((m) => { setToast(m); }, []);
@@ -35,7 +39,7 @@ export default function Hub() {
   useEffect(() => { if (toast) { const t = setTimeout(() => setToast(""), 6000); return () => clearTimeout(t); } }, [toast]);
 
   // remembered choices
-  useEffect(() => { try { const s = JSON.parse(localStorage.getItem("th.sel") || "null"); setSel(s ? new Set(s) : null); setEnv(localStorage.getItem("th.env") || ""); } catch {} }, []);
+  useEffect(() => { try { const s = JSON.parse(localStorage.getItem("th.sel") || "null"); setSel(s ? new Set(s) : null); localStorage.removeItem("th.env"); } catch {} }, []);
   const repos = ws?.repos || [];
   const selected = useMemo(() => (sel ? repos.filter((r) => sel.has(r.id)) : repos), [sel, repos]); // nothing chosen yet = show all
   const toggle = (id) => { const n = new Set((sel || new Set(repos.map((r) => r.id)))); n.has(id) ? n.delete(id) : n.add(id); setSel(n); try { localStorage.setItem("th.sel", JSON.stringify([...n])); } catch {} };
@@ -54,8 +58,13 @@ export default function Hub() {
       await refresh();
     } catch (e) { setToast(e.message); }
   };
-  const pickEnv = (v) => { setEnv(v); try { localStorage.setItem("th.env", v); } catch {} };
-  const envId = env && envs.some((e) => String(e.id) === env) ? env : "";
+  useEffect(() => { setTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light"); }, []);
+  const toggleTheme = () => {
+    const n = theme === "dark" ? "light" : "dark"; setTheme(n);
+    document.documentElement.setAttribute("data-theme", n);
+    try { localStorage.setItem("th.theme", n); localStorage.setItem("rep.theme", n); } catch {} // the report page opens in the same mode
+  };
+  const envId = ""; // every suite runs with its own default environment (set per suite under Manage → Suites)
 
   const runRepos = async (ids) => {
     setBusy(true);
@@ -68,53 +77,51 @@ export default function Hub() {
   const analysed = async (r) => { await refresh(); only(r.repo_id); setFocus(r.repo_id); setTimeout(() => document.getElementById("repo-" + r.repo_id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 250); };
   const ctx = { focus, ws, repos, selected, stats, envs, envId, setErr, refresh, runSuite, runRepos, busy, openRun: setDrawer, manage: setManage, toggle, only };
 
+  const NAV = [["overview", "Overview", "grid", () => document.querySelector(".pbody")?.scrollTo({ top: 0, behavior: "smooth" })], ["repos", "Repos", "folder", () => setManage("repos")], ["suites", "Suites", "cube", () => setManage("suites")], ["history", "Run history", "chart", () => setManage("history")], ["envs", "Environments", "user", () => setManage("envs")], ["auto", "Automation", "clock", () => setManage("auto")]];
+  const focusAnalyze = () => { const el = document.getElementById("analyze-input"); el?.scrollIntoView({ behavior: "smooth", block: "center" }); setTimeout(() => el?.focus(), 350); };
+
   return (
-    <div className="app">
-      <header className="top">
-        <div className="brand"><div className="logo">✓</div><div><b>Test Dashboard</b><small>run and review every layer of your tests</small></div></div>
-        <div className="topmid">
-          <span className="muted small">Run against</span>
-          <select value={envId} onChange={(e) => pickEnv(e.target.value)} className="envsel">
-            <option value="">each suite&apos;s default</option>
-            {envs.map((e) => <option key={e.id} value={e.id}>{e.name}</option>)}
-          </select>
-        </div>
-        <div className="topact">
-          <button className="btn" onClick={() => setManage("repos")}>+ Add repo</button>
-          <button className="btn" onClick={() => setManage("suites")}>⚙ Manage</button>
-          <button className="btn go" disabled={busy || !runnable.length} onClick={() => runRepos(runnable.map((r) => r.id))} title={runnable.length ? "" : "Select a trusted repo with suites"}>
-            ▶ Run {selected.length === repos.length ? "all" : `selected (${runnable.length})`}
+    <div className="stage"><div className="device">
+      <aside className="dock">
+        <div className="logotile" title="Test Dashboard"><Logo size={50} /></div>
+        {NAV.map(([k, label, icon, fn], i) => (
+          <button key={k} className={`dk ${i === 0 ? "on" : ""}`} title={label} aria-label={label} onClick={fn}>
+            <Icon name={icon} />{k === "history" && (ws?.running || 0) > 0 && <span className="badge" />}
           </button>
-        </div>
-      </header>
-      <div className="body">
-        <aside className="rail">
-          <div className="railhead"><h4>Repositories</h4><span className="small muted"><a onClick={() => all(true)}>all</a> · <a onClick={() => all(false)}>none</a></span></div>
-          <p className="hint" style={{ margin: "0 0 10px" }}>Tick the repos you want to see and run.</p>
-          {!ws && <div className="muted small">Loading…</div>}
-          {ws && !repos.length && <div className="empty small">No repos yet.<br /><button className="btn sm go" style={{ marginTop: 8 }} onClick={() => setManage("repos")}>Add your first repo</button></div>}
-          {repos.map((r) => {
-            const h = repoHealth(r), on = sel ? sel.has(r.id) : true;
-            const tests = r.suites.reduce((a, s) => a + (s.done?.total || 0), 0), passed = r.suites.reduce((a, s) => a + (s.done?.passed || 0), 0);
-            return (
-              <label key={r.id} className={`rrow ${on ? "on" : ""}`}>
-                <input type="checkbox" checked={on} onChange={() => toggle(r.id)} />
-                <div className="rmain">
-                  <div className="rname"><span className={`hd ${DOT[h]}`} />{r.name}</div>
-                  <div className="rmeta">{r.kind === "tests" ? "tests repo" : "app"} · {r.suites.length} suite{r.suites.length === 1 ? "" : "s"}{tests ? ` · ${passed}/${tests} passing` : ""}</div>
-                  <div className="chips">{[...new Set(r.suites.map((s) => s.layer))].map((l) => <span key={l} className="pill">{layerName(l)}</span>)}</div>
+        ))}
+        <div className="grow" />
+        <button className="dk" title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} aria-label="Switch light or dark mode" onClick={toggleTheme}><Icon name={theme === "dark" ? "sun" : "moon"} /></button>
+      </aside>
+      <section className="panel">
+        <header className="phead">
+          <h1>Overview</h1>
+          <button className="roundbtn" title="Analyze a repo" aria-label="Analyze a repo" onClick={focusAnalyze}><Icon name="search" size={20} /></button>
+          <button className="roundbtn" title={ws?.running ? `${ws.running} run${ws.running === 1 ? "" : "s"} in progress` : "Run history"} aria-label="Run history" onClick={() => setManage("history")}><Icon name="bell" size={20} />{(ws?.running || 0) > 0 && <span className="badge" />}</button>
+          <button className="btn" onClick={() => setManage("repos")}><Icon name="plus" size={16} stroke={2} />Add repo</button>
+          <button className="btn go" disabled={busy || !runnable.length} onClick={() => runRepos(runnable.map((r) => r.id))} title={runnable.length ? "" : "Select a trusted repo with suites"}>
+            <Icon name="play" size={13} />Run {selected.length === repos.length ? "all" : `selected (${runnable.length})`}
+          </button>
+        </header>
+        <div className="pbody">
+          {!ws ? <div className="empty">Loading…</div> : !repos.length ? (
+            <div className="maingrid"><Workspace {...ctx} nTests={nTests} /><Hero onDone={analysed} setErr={setErr} /></div>
+          ) : (
+            <>
+              <div className="toprow">
+                <div><div className="sechead"><h2>Results</h2></div><ResultsCard selected={selected} tick={`${ws?.running || 0}-${stats?.summary?.weekRuns || 0}`} /></div>
+                <div>
+                  <div className="sechead"><h2>Your repos</h2><div className="acts"><button className="btn sm" onClick={() => all(true)}>All</button><button className="btn sm" onClick={() => all(false)}>None</button></div></div>
+                  <RepoCards repos={repos} sel={sel} toggle={toggle} only={only} removeRepo={removeRepo} onAdd={() => setManage("repos")} />
                 </div>
-                <button className="only" title="Show only this repo" onClick={(e) => { e.preventDefault(); only(r.id); }}>only</button>
-                <button className="rm" title="Remove this repo and its history from the dashboard" onClick={(e) => { e.preventDefault(); e.stopPropagation(); removeRepo(r); }}>✕</button>
-              </label>
-            );
-          })}
-        </aside>
-        <main className="main"><Hero onDone={analysed} setErr={setErr} /><Workspace {...ctx} nTests={nTests} /></main>
-      </div>
+              </div>
+              <div className="maingrid"><Workspace {...ctx} nTests={nTests} /><Hero onDone={analysed} setErr={setErr} /></div>
+            </>
+          )}
+        </div>
+      </section>
       {drawer && <div className="scrim" onClick={() => setDrawer(null)}><aside className="drawer" onClick={(e) => e.stopPropagation()}><RunDetail id={drawer} go={(p) => setDrawer(p.split("/")[1])} setErr={setErr} onClose={() => setDrawer(null)} /></aside></div>}
       {manage && <Manage tab={manage} setTab={setManage} onClose={() => { setManage(null); refresh(); }} {...ctx} />}
       {toast && <div className="toast" onClick={() => setToast("")}>{toast}</div>}
-    </div>
+    </div></div>
   );
 }

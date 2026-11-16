@@ -62,12 +62,12 @@ export function RunDetail({ id, go, setErr, onClose }) {
     <>
       <div className="head">
         <div>
-          {onClose && <button className="btn sm" onClick={onClose}>✕ Close</button>}
           <h1>{run.suite_name} <Status s={run.status} /></h1>
           <p>{layerName(run.layer)} · {run.repo_name}{run.commit_sha ? "@" + run.commit_sha : ""}{run.env_name ? " · env " + run.env_name : ""} · {run.trigger} · {ago(run.queued_at)}</p>
         </div>
         <div className="acts">
           {live ? <button className="btn danger" onClick={() => api(`/runs/${id}/cancel`, { method: "POST" })}>Stop</button> : <button className="btn" onClick={rerun}>↻ Run again</button>}
+          {onClose && <button className="btn go" onClick={onClose}>✕ Close</button>}
         </div>
       </div>
       <div className="kpis">
@@ -110,6 +110,12 @@ export function RunDetail({ id, go, setErr, onClose }) {
         </div>
       )}
       <p className="hint mono">$ {run.command || "…"}</p>
+      {!live && (
+        <div className="drawerfoot">
+          <span className="muted small">Run #{run.id} finished {ago(run.finished_at)}</span>
+          <a className="btn sky" href={`/api/repos/${run.repo_id}/report`} target="_blank" rel="noreferrer">Open report ↗</a>
+        </div>
+      )}
     </>
   );
 }

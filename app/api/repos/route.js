@@ -7,7 +7,7 @@ import { syncRepo, REPOS_DIR } from "@/lib/git";
 
 export async function GET(req) {
   const g = guard(req); if (g) return g;
-  const repos = all("SELECT * FROM repos ORDER BY kind DESC, name").map((r) => ({ ...r, suites: get("SELECT COUNT(*) n FROM suites WHERE repo_id=?", r.id).n }));
+  const repos = all("SELECT * FROM repos ORDER BY created_at DESC, id DESC").map((r) => ({ ...r, suites: get("SELECT COUNT(*) n FROM suites WHERE repo_id=?", r.id).n }));
   return NextResponse.json({ repos });
 }
 export async function POST(req) {

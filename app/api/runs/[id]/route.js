@@ -4,7 +4,7 @@ import { guard, fail } from "@/lib/guard";
 export async function GET(req, { params }) {
   const g = guard(req); if (g) return g;
   const { id } = await params;
-  const run = get(`SELECT r.*, s.name AS suite_name, s.layer, s.parser, p.name AS repo_name, e.name AS env_name FROM runs r JOIN suites s ON s.id=r.suite_id JOIN repos p ON p.id=s.repo_id LEFT JOIN envs e ON e.id=r.env_id WHERE r.id=?`, id);
+  const run = get(`SELECT r.*, s.name AS suite_name, s.layer, s.parser, s.repo_id, p.name AS repo_name, e.name AS env_name FROM runs r JOIN suites s ON s.id=r.suite_id JOIN repos p ON p.id=s.repo_id LEFT JOIN envs e ON e.id=r.env_id WHERE r.id=?`, id);
   if (!run) return fail(404, "Run not found");
   const results = all("SELECT * FROM results WHERE run_id=? ORDER BY CASE status WHEN 'failed' THEN 0 WHEN 'skipped' THEN 2 ELSE 1 END, id", id);
   const artifacts = all("SELECT id, kind, name, size FROM artifacts WHERE run_id=? ORDER BY kind, name", id);

@@ -3,12 +3,15 @@ import { useEffect, useState, useCallback } from "react";
 import { api, ms, ago, Status, layerName, LAYER_INFO } from "./ui";
 
 const BLANK = { name: "", repo_id: "", layer: "integration", cwd: ".", setup: "", command: "", parser: "junit", timeout_s: 600, schedule_min: 0, trace: "", env_id: "" };
-const PARSERS = [["junit", "JUnit XML (node:test, most runners)"], ["playwright", "Playwright JSON"], ["jest", "Jest JSON"], ["vitest", "Vitest JSON"], ["exit", "Exit code only (pass/fail)"]];
+const PARSERS = [["junit", "JUnit XML (node:test, Cypress, pytest, PHPUnit …)"], ["jest", "Jest JSON"], ["vitest", "Vitest JSON"], ["mocha", "Mocha JSON"], ["playwright", "Playwright JSON"], ["go", "go test -json"], ["trx", ".NET trx"], ["rspec", "RSpec JSON"], ["exit", "Exit code only (reads any report the command writes)"]];
 
 export default function Suites({ env, envs, go, setErr, refresh, stats }) {
   const [suites, setSuites] = useState([]), [repos, setRepos] = useState([]);
   const [form, setForm] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [presets, setPresets] = useState([]);
+  useEffect(() => { api("/presets").then((d) => setPresets(d.presets)).catch(() => {}); }, []);
+  const applyPreset = (id) => { const p = presets.find((x) => x.id === id); if (p) setForm((f) => ({ ...f, name: f.name || p.label, layer: p.layer, command: p.command, parser: p.parser, setup: p.setup || f.setup, trace: p.trace || "", note: p.note })); };
   const load = useCallback(async () => { try { setSuites((await api("/suites")).suites); setRepos((await api("/repos")).repos); } catch (e) { setErr(e.message); } }, [setErr]);
   useEffect(() => { load(); const t = setInterval(load, 3000); return () => clearInterval(t); }, [load]);
 
@@ -35,6 +38,15 @@ export default function Suites({ env, envs, go, setErr, refresh, stats }) {
         <div className="card">
           <h2>{form.id ? "Edit suite" : "New suite"}</h2>
           <div className="form" style={{ marginTop: 12 }}>
+            {!form.id && (
+              <div className="wide"><label>Start from a ready-made command (optional)</label>
+                <select defaultValue="" onChange={(e) => applyPreset(e.target.value)}>
+                  <option value="">Choose one: Jest, Vitest, Playwright, Cypress, pytest, Go, Maven, dotnet, RSpec …</option>
+                  {[...new Set(presets.map((p) => p.group))].map((g) => <optgroup key={g} label={g}>{presets.filter((p) => p.group === g).map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}</optgroup>)}
+                </select>
+                {form.note && <div className="hint">{form.note}</div>}
+              </div>
+            )}
             <div><label>Name</label><input value={form.name} onChange={set("name")} placeholder="Checkout API" /></div>
             <div><label>Repo</label><select value={form.repo_id} onChange={set("repo_id")} disabled={!!form.id}>{repos.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}</select></div>
             <div><label>Layer</label><select value={form.layer} onChange={set("layer")}>{Object.keys(LAYER_INFO).map((l) => <option key={l} value={l}>{layerName(l)}</option>)}</select></div>

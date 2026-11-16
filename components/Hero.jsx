@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { api } from "./ui";
 
-// The front door: paste any public GitHub repo (or a folder on this computer) and get a test analysis.
+// The dark promo card (like "Earn free crypto" in the reference): paste a repo link or folder and analyze it.
 export default function Hero({ onDone, setErr }) {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState("");
@@ -16,17 +16,14 @@ export default function Hero({ onDone, setErr }) {
     clearTimeout(t); setBusy("");
   }
   return (
-    <section className="hero">
-      <div className="glow" />
-      <div className="hero-in">
-        <span className="eyebrow">Test any repo in one step</span>
-        <h1>Paste a repo. See every test it has,<br />what it needs, and run it.</h1>
-        <p>Works with any public GitHub link or a project folder on this computer. Nothing runs until you say so.</p>
-        <form className="heroform" onSubmit={(e) => { e.preventDefault(); go(); }}>
-          <input value={input} onChange={(e) => setInput(e.target.value)} placeholder="https://github.com/owner/repo   or   /Users/you/project" disabled={!!busy} spellCheck={false} />
-          <button className="btn go big" disabled={!input.trim() || !!busy}>{busy ? <><span className="spin" />{busy}</> : "Analyze"}</button>
-        </form>
-      </div>
-    </section>
+    <aside className="promo">
+      <span className="eyebrow">Test any repo in one step</span>
+      <h3>Paste a repo and see every <em>test</em> it has, and what it needs.</h3>
+      <p>Any public GitHub link, or a project folder on this computer. Nothing runs until you say so.</p>
+      <form onSubmit={(e) => { e.preventDefault(); go(); }}>
+        <input id="analyze-input" value={input} onChange={(e) => setInput(e.target.value)} placeholder="https://github.com/owner/repo or /path/to/project" disabled={!!busy} spellCheck={false} />
+        <button className="btn sky big" disabled={!input.trim() || !!busy}>{busy ? <><span className="spin" />{busy}</> : "Analyze now"}</button>
+      </form>
+    </aside>
   );
 }

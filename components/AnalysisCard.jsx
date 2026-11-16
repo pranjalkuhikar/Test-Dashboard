@@ -97,7 +97,7 @@ export default function AnalysisCard({ repo, refresh, openRun, setErr, autoOpen,
                     <label className="sitem" key={i}>
                       <input type="checkbox" checked={!!pick[i]} disabled={x.exists} onChange={(e) => setPick({ ...pick, [i]: e.target.checked })} />
                       <span className="pill" style={{ borderColor: LC[x.layer], color: LC[x.layer] }}>{layerName(x.layer)}</span>
-                      <b>{x.name}</b>{x.exists && <span className="pill">added</span>}
+                      <b>{x.name}</b>{x.optional && <span className="pill" title="Added, but left out of Run all. Run it yourself when you want it.">optional</span>}{x.exists && <span className="pill">added</span>}
                       <code className="cmd">{x.command.replace(/--test-reporter\S+/g, "").replace(/\s+/g, " ").slice(0, 70)}</code>
                     </label>
                   ))}
@@ -108,7 +108,7 @@ export default function AnalysisCard({ repo, refresh, openRun, setErr, autoOpen,
                 )}
                 <div className="acts">
                   <button className="btn go" disabled={busy || (!repo.trusted && !trust) || !chosen.length} onClick={runIt}>{busy ? <><span className="spin" />Starting…</> : "▶ Add & run these tests"}</button>
-                  <a className="btn" href={`/api/repos/${repo.id}/report`} target="_blank" rel="noreferrer">📄 Open report</a>
+                  <a className="btn" href={`/api/repos/${repo.id}/report`} target="_blank" rel="noreferrer">Open report</a>
                   <button className="btn" onClick={load}>↻ Re-scan</button>
                 </div>
               </>

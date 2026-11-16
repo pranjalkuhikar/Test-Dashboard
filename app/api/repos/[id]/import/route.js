@@ -8,7 +8,7 @@ export async function POST(req, { params }) {
   let added = 0;
   for (const s of b.suites || []) {
     if (get("SELECT 1 x FROM suites WHERE repo_id=? AND name=?", id, s.name)) continue;
-    insert("INSERT INTO suites (name, repo_id, layer, cwd, setup, command, parser, trace, created_at) VALUES (?,?,?,?,?,?,?,?,?)", s.name, id, s.layer || "unit", s.cwd || ".", s.setup || "", s.command, s.parser || "exit", s.trace || "", now());
+    insert("INSERT INTO suites (name, repo_id, layer, cwd, setup, command, parser, trace, enabled, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)", s.name, id, s.layer || "unit", s.cwd || ".", s.setup || "", s.command, s.parser || "exit", s.trace || "", s.optional ? 0 : 1, now());
     added++;
   }
   return NextResponse.json({ added });
